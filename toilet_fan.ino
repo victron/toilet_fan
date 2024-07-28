@@ -8,22 +8,31 @@ const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
 
 void setup() {
+  // Ініціалізація серійного зв'язку для відлагодження
   Serial.begin(115200);
+  Serial.println("Booting");
+
+  // Підключення до WiFi
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   while(WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
+  Serial.println("");
   Serial.println("WiFi connected");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
 
-  ArduinoOTA.setHostname("esp-ota");
-  ArduinoOTA.setPassword("admin");
+  // Налаштування OTA
+  ArduinoOTA.setHostname("esp8266-ota");
+  ArduinoOTA.setPassword("admin");  // Встанови свій пароль
 
   ArduinoOTA.onStart([]() {
     String type;
     if(ArduinoOTA.getCommand() == U_FLASH) {
       type = "sketch";
-    } else {
+    } else {  // U_SPIFFS
       type = "filesystem";
     }
     Serial.println("Start updating " + type);
@@ -57,5 +66,6 @@ void setup() {
 }
 
 void loop() {
+  // Обробка OTA запитів
   ArduinoOTA.handle();
 }
