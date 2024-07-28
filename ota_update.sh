@@ -25,7 +25,7 @@
 # ------------------- install custom libs
 # arduino-cli core install home-assistant-integration
 # arduino-cli lib install "Adafruit BME280 Library"
-project_name=${PWD##*/}
+project_name="${PWD##*/}"
 . ./secrets.sh
 espota='/home/vic/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/espota.py'
 build_cache='~/ota_update/build_cache'
@@ -36,7 +36,7 @@ git log -1
 echo "------- start combile ---------"
 echo $builds_dir
 echo ${project_name}
-arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --build-cache-path ${build_cache} --output-dir ${builds_dir} ${project_name}.ino
+arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --build-cache-path ${build_cache} --output-dir ${builds_dir} ./${project_name}.ino
 if [ $? -ne 0 ]; then
   echo "Команда завершилась з помилкою. Завершення скрипта."
   exit 1
