@@ -28,8 +28,8 @@
 project_name="${PWD##*/}"
 . ./secrets.sh
 espota='/home/vic/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/espota.py'
-build_cache="~/ota_update/build_cache"
-builds_dir="~/ota_update/build"
+build_cache='/home/vic/ota_update/build_cache'
+builds_dir='/home/vic/ota_update/build'
 
 git pull
 git log -1
