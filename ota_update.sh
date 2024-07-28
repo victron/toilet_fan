@@ -35,12 +35,13 @@ git pull
 git log -1
 echo "------- start combile ---------"
 echo $builds_dir
-echo 
+echo ${project_name}
 arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --build-cache-path ${build_cache} --output-dir ${builds_dir} ${project_name}.ino
 if [ $? -ne 0 ]; then
   echo "Команда завершилась з помилкою. Завершення скрипта."
   exit 1
 fi
+echo ${builds_dir}/${project_name}
 python3 ${espota} --ip ${DEVICE_IP} --auth=${OTA_PASSWORD} --file ${builds_dir}/${project_name}.ino.bin
 
 
