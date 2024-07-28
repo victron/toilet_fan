@@ -136,7 +136,7 @@ void loop() {
   // Перевірка натискання кнопки
   if(btn.click()) {
     // Зміна стану перемикача
-    onSwitchCommand(!fanSwitch.getCurrentState(), &fanSwitch);
+    // onSwitchCommand(!fanSwitch.getCurrentState(), &fanSwitch);
   }
 
   // Перевіряємо, чи минув інтервал оновлення
