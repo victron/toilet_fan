@@ -28,8 +28,8 @@
 project_name="${PWD##*/}"
 . ./secrets.sh
 espota='/home/vic/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/espota.py'
-build_cache='~/ota_update/build_cache'
-builds_dir='~/ota_update/build'
+build_cache="~/ota_update/build_cache"
+builds_dir="~/ota_update/build"
 
 git pull
 git log -1
@@ -45,3 +45,4 @@ echo ${builds_dir}/${project_name}
 python3 ${espota} --ip ${DEVICE_IP} --auth=${OTA_PASSWORD} --file ${builds_dir}/${project_name}.ino.bin
 
 
+ 
