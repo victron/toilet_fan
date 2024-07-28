@@ -34,7 +34,9 @@ builds_dir='~/ota_update/build'
 git pull
 git log -1
 echo "------- start combile ---------"
-arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --build-cache-path ${build_cache} --output-dir ${builds_dir} ./${project_name}.ino
+echo $builds_dir
+echo 
+arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --build-cache-path ${build_cache} --output-dir ${builds_dir} ${project_name}.ino
 if [ $? -ne 0 ]; then
   echo "Команда завершилась з помилкою. Завершення скрипта."
   exit 1
