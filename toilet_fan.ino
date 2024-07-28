@@ -10,14 +10,15 @@
 #define HOSTNAME "toilet_fan"
 #define SSR_PIN 0
 #define BUTTON_PIN 1  // не використовується
+#define LED 2
+bool connected = false;
 
 WiFiClient client;
 HADevice device(HOSTNAME);
 HAMqtt mqtt(client, device);
-HASwitch fanSwitch("fan_switch");
-
-// можливо потрібно мати індувідуальний id для entities
-HASensorNumber wifiRssi("wifiRssi", HASensorNumber::PrecisionP0);
+// Unique ID
+HASwitch fanSwitch("fan_switch_toilet");
+HASensorNumber wifiRssi("wifiRssi_toilet", HASensorNumber::PrecisionP0);
 
 // Створюємо об'єкт кнопки
 button btn(BUTTON_PIN);
@@ -46,6 +47,21 @@ void onSwitchCommand(bool state, HASwitch *sender) {
   // SSR only, instead MSR
   digitalWrite(SSR_PIN, (state ? HIGH : LOW));
   sender->setState(state);  // report state back to the Home Assistant
+}
+
+void onMqttConnected() {
+  digitalWrite(LED, HIGH);
+  connected = true;
+}
+
+void onMqttDisconnected() {
+  Serial.println("Disconnected from the broker!");
+  connected = false;
+}
+
+void onMqttStateChanged(HAMqtt::ConnectionState state) {
+  Serial.print("MQTT state changed to: ");
+  Serial.println(static_cast<int8_t>(state));
 }
 
 void setup() {
@@ -78,6 +94,9 @@ void setup() {
 
   // handle switch state
   fanSwitch.onCommand(onSwitchCommand);
+  mqtt.onConnected(onMqttConnected);
+  mqtt.onDisconnected(onMqttDisconnected);
+  mqtt.onStateChanged(onMqttStateChanged);
 
   mqtt.begin(BROKER_ADDR, MQTT_USERNAME, MQTT_PASSWORD);
   device.enableSharedAvailability();
@@ -93,11 +112,18 @@ unsigned int wifi_fail_counter = 0;
 const unsigned int wifi_fail_triger = 300000;  // при кількості спроб реконнест
 void loop() {
   // Перевірка WiFi з'єднання
+  if(!connected && WiFi.status() == WL_CONNECTED) {
+    // not mqtt and connected to wifi
+    Serial.println("WiFi OK, mqtt NOK");
+    digitalWrite(LED, (millis() / 1000) % 2);
+  }
+  // Перевірка WiFi з'єднання
   if(WiFi.status() != WL_CONNECTED && wifi_fail_counter > wifi_fail_triger) {
     Serial.println("WiFi lost, trying to reconnect...");
     setupWiFi();
   }
   if(WiFi.status() != WL_CONNECTED) {
+    digitalWrite(LED, LOW);
     wifi_fail_counter++;
     Serial.print("WiFi lost, counter=");
     Serial.println(wifi_fail_counter);
