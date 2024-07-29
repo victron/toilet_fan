@@ -45,7 +45,9 @@ void setupWiFi() {
 
 void onSwitchCommand(bool state, HASwitch *sender) {
   // SSR only, instead MSR
-  digitalWrite(SSR_PIN, (state ? HIGH : LOW));
+  // digitalWrite(SSR_PIN, (state ? HIGH : LOW));
+  digitalWrite(SSR_PIN, (state ? LOW : HIGH));  // інвертна логіка
+  // ssr підключений "-" до вивода, інший на +3.3В
   sender->setState(state);  // report state back to the Home Assistant
 }
 
@@ -81,7 +83,7 @@ void setup() {
   device.setSoftwareVersion("1.0.0");
 
   pinMode(SSR_PIN, OUTPUT);
-  digitalWrite(SSR_PIN, LOW);
+  digitalWrite(SSR_PIN, HIGH);
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
 
