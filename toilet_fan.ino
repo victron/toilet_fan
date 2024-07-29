@@ -21,7 +21,7 @@ HASwitch fanSwitch("fan_switch_toilet");
 HASensorNumber wifiRssi("wifiRssi_toilet", HASensorNumber::PrecisionP0);
 
 // Створюємо об'єкт кнопки
-button btn(BUTTON_PIN);
+// button btn(BUTTON_PIN);
 
 void setupWiFi() {
   // template function
@@ -136,10 +136,13 @@ void loop() {
   ArduinoOTA.handle();
 
   // Перевірка натискання кнопки
-  if(btn.click()) {
-    // Зміна стану перемикача
-    // onSwitchCommand(!fanSwitch.getCurrentState(), &fanSwitch);
-  }
+  // if(btn.click()) {
+  //   // Зміна стану перемикача
+  //   // TODO: in esp-01 on pin 3 (RX) there is a problem. switch flashing permanently.
+  //   // робити тригер щоб Serial.end(); через якийсь час.
+  //   // продумати, щоб можна було підключити serial до цього часу.
+  //   // onSwitchCommand(!fanSwitch.getCurrentState(), &fanSwitch);
+  // }
 
   // Перевіряємо, чи минув інтервал оновлення
   if(millis() - lastUpdateAt > updateInterval) {
