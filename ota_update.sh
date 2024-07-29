@@ -30,13 +30,16 @@ project_name="${PWD##*/}"
 espota='/home/vic/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/espota.py'
 build_cache='/home/vic/ota_update/build_cache'
 builds_dir='/home/vic/ota_update/build'
+BOARD=$(jq -r '.board' .vscode/arduino.json)
+CONFIGURATION=$(jq -r '.configuration' .vscode/arduino.json)
+
 
 git pull
 git log -1
 echo "------- start combile ---------"
 echo $builds_dir
 echo ${project_name}
-arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --build-cache-path ${build_cache} --output-dir ${builds_dir} ${project_name}.ino
+arduino-cli compile --fqbn ${BOARD}:${CONFIGURATION} --build-cache-path ${build_cache} --output-dir ${builds_dir} ${project_name}.ino
 if [ $? -ne 0 ]; then
   echo "Команда завершилась з помилкою. Завершення скрипта."
   exit 1
