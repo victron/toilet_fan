@@ -27,25 +27,18 @@
 # arduino-cli lib install "Adafruit BME280 Library"
 project_name="${PWD##*/}"
 . ./secrets.sh
-espota='/home/vic/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/espota.py'
-build_cache='/home/vic/ota_update/build_cache'
-builds_dir='/home/vic/ota_update/build'
-BOARD=$(jq -r '.board' .vscode/arduino.json)
-CONFIGURATION=$(jq -r '.configuration' .vscode/arduino.json)
-
+OTA_UPLOAD_PORT=${DEVICE_IP}
+OTA_AUTH=${OTA_PASSWORD}
 
 git pull
 git log -1
 echo "------- start combile ---------"
-echo $builds_dir
-echo ${project_name}
-arduino-cli compile --fqbn ${BOARD}:${CONFIGURATION} --build-cache-path ${build_cache} --output-dir ${builds_dir} ${project_name}.ino
+pio run
 if [ $? -ne 0 ]; then
   echo "Команда завершилась з помилкою. Завершення скрипта."
   exit 1
 fi
-echo ${builds_dir}/${project_name}
-python3 ${espota} --ip ${DEVICE_IP} --auth=${OTA_PASSWORD} --file ${builds_dir}/${project_name}.ino.bin
+pio run --target upload --upload-port <YOUR_DEVICE_IP>
 
 
  
