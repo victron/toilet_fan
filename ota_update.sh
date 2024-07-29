@@ -36,7 +36,7 @@ git log -1
 echo "------- start combile ---------"
 echo $builds_dir
 echo ${project_name}
-arduino-cli compile --fqbn esp8266:esp8266:generic --build-cache-path ${build_cache} --output-dir ${builds_dir} ${project_name}.ino
+arduino-cli compile --fqbn esp8266:esp8266:generic:FlashSize=1M --build-cache-path ${build_cache} --output-dir ${builds_dir} ${project_name}.ino
 if [ $? -ne 0 ]; then
   echo "Команда завершилась з помилкою. Завершення скрипта."
   exit 1
