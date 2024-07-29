@@ -82,6 +82,8 @@ void setup() {
 
   pinMode(SSR_PIN, OUTPUT);
   digitalWrite(SSR_PIN, LOW);
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, HIGH);
 
   // set icon (optional)
   fanSwitch.setIcon("mdi:fan");
