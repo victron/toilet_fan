@@ -50,7 +50,7 @@ void onSwitchCommand(bool state, HASwitch *sender) {
 }
 
 void onMqttConnected() {
-  digitalWrite(LED, HIGH);
+  digitalWrite(LED, LOW);
   connected = true;
 }
 
