@@ -112,23 +112,23 @@ unsigned int wifi_fail_counter = 0;
 const unsigned int wifi_fail_triger = 300000;  // при кількості спроб реконнест
 void loop() {
   // Перевірка WiFi з'єднання
-  if(!connected && WiFi.status() == WL_CONNECTED) {
-    // not mqtt and connected to wifi
-    Serial.println("WiFi OK, mqtt NOK");
-    digitalWrite(LED, (millis() / 1000) % 2);
-  }
-  // Перевірка WiFi з'єднання
-  if(WiFi.status() != WL_CONNECTED && wifi_fail_counter > wifi_fail_triger) {
-    Serial.println("WiFi lost, trying to reconnect...");
-    setupWiFi();
-  }
-  if(WiFi.status() != WL_CONNECTED) {
-    digitalWrite(LED, LOW);
-    wifi_fail_counter++;
-    Serial.print("WiFi lost, counter=");
-    Serial.println(wifi_fail_counter);
-    return;
-  }
+  // if(!connected && WiFi.status() == WL_CONNECTED) {
+  //   // not mqtt and connected to wifi
+  //   Serial.println("WiFi OK, mqtt NOK");
+  //   digitalWrite(LED, (millis() / 1000) % 2);
+  // }
+  // // Перевірка WiFi з'єднання
+  // if(WiFi.status() != WL_CONNECTED && wifi_fail_counter > wifi_fail_triger) {
+  //   Serial.println("WiFi lost, trying to reconnect...");
+  //   setupWiFi();
+  // }
+  // if(WiFi.status() != WL_CONNECTED) {
+  //   digitalWrite(LED, LOW);
+  //   wifi_fail_counter++;
+  //   Serial.print("WiFi lost, counter=");
+  //   Serial.println(wifi_fail_counter);
+  //   return;
+  // }
   digitalWrite(SSR_PIN, LOW);
   mqtt.loop();
   ArduinoOTA.handle();
