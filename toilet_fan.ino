@@ -50,7 +50,7 @@ void onSwitchCommand(bool state, HASwitch *sender) {
 }
 
 void onMqttConnected() {
-  digitalWrite(LED, LOW);
+  digitalWrite(LED, HIGH);
   connected = true;
 }
 
@@ -129,7 +129,7 @@ void loop() {
     Serial.println(wifi_fail_counter);
     return;
   }
-
+  digitalWrite(SSR_PIN, LOW);
   mqtt.loop();
   ArduinoOTA.handle();
 
