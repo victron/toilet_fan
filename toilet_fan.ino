@@ -9,7 +9,7 @@
 
 #define HOSTNAME "toilet_fan"
 #define SSR_PIN 0
-#define BUTTON_PIN 1  // не використовується
+#define BUTTON_PIN 3  // only RX possible as input
 #define LED 2
 bool connected = false;
 
@@ -138,7 +138,7 @@ void loop() {
   // Перевірка натискання кнопки
   if(btn.click()) {
     // Зміна стану перемикача
-    // onSwitchCommand(!fanSwitch.getCurrentState(), &fanSwitch);
+    onSwitchCommand(!fanSwitch.getCurrentState(), &fanSwitch);
   }
 
   // Перевіряємо, чи минув інтервал оновлення
