@@ -129,7 +129,7 @@ void loop() {
   //   Serial.println(wifi_fail_counter);
   //   return;
   // }
-  digitalWrite(SSR_PIN, LOW);
+  digitalWrite(LED, LOW);
   mqtt.loop();
   ArduinoOTA.handle();
 
