@@ -37,6 +37,15 @@ void setupWiFi() {
   Serial.print("connecting to ");
   Serial.println(WIFI_SSID);
 
+  Serial.println("Сканую I2C пристрої...");
+  for(uint8_t address = 1; address < 127; address++) {
+    Wire.beginTransmission(address);
+    if(Wire.endTransmission() == 0) {
+      Serial.print("Знайдено пристрій на 0x");
+      Serial.println(address, HEX);
+    }
+  }
+
   WiFi.hostname(HOSTNAME);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while(WiFi.status() != WL_CONNECTED) {
