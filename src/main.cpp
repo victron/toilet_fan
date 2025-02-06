@@ -186,6 +186,7 @@ void loop() {
     int8_t rssi = WiFi.RSSI();
     wifiRssi.setValue(rssi);
 
+    sht30.heater(false);
     temperature = sht30.readTemperature();
     humidity = sht30.readHumidity();
     Serial.print("Temperature:");
