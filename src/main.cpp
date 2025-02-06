@@ -81,14 +81,14 @@ void setup() {
   setupWiFi();
 
   // I2C scaner
-  // Serial.println("Сканую I2C пристрої...");
-  // for(uint8_t address = 1; address < 127; address++) {
-  //   Wire.beginTransmission(address);
-  //   if(Wire.endTransmission() == 0) {
-  //     Serial.print("Знайдено пристрій на 0x");
-  //     Serial.println(address, HEX);
-  //   }
-  // }
+  Serial.println("Сканую I2C пристрої...");
+  for(uint8_t address = 1; address < 127; address++) {
+    Wire.beginTransmission(address);
+    if(Wire.endTransmission() == 0) {
+      Serial.print("Знайдено пристрій на 0x");
+      Serial.println(address, HEX);
+    }
+  }
 
   // Логування розміру флеш-пам'яті
   uint32_t flashSize = ESP.getFlashChipRealSize();
