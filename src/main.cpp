@@ -111,11 +111,11 @@ void setup() {
 
   // configure sensors
   roomTemp.setIcon("mdi:thermometer");
-  roomTemp.setName("Bath Temp");
+  roomTemp.setName("Room Temp");
   roomTemp.setUnitOfMeasurement("°C");
 
   roomHum.setIcon("mdi:water-percent");
-  roomHum.setName("Bath Humidity");
+  roomHum.setName("Room Humidity");
   roomHum.setUnitOfMeasurement("%");
 
   wifiRssi.setIcon("mdi:wifi");
