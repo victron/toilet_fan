@@ -2,7 +2,7 @@
 
 void setupOTA(const char *hostname, const char *password) {
   ArduinoOTA.setHostname(hostname);
-  ArduinoOTA.setPort(1234);
+  ArduinoOTA.setPort(12345);
   ArduinoOTA.setPassword(password);  // Додавання пароля
 
   ArduinoOTA.onStart([]() {
@@ -33,7 +33,7 @@ void setupOTA(const char *hostname, const char *password) {
         } });
 
   ArduinoOTA.begin();
-  Serial.println("Ready");
+  Serial.println("OTA Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 }
