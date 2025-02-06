@@ -1,7 +1,7 @@
-#include <AHTxx.h>
 #include <Arduino.h>
 #include <ArduinoHA.h>
 #include <ESP8266WiFi.h>
+#include <WEMOS_SHT3x.h>
 #include <Wire.h>
 
 #include "OTAHandler.h"
@@ -17,7 +17,7 @@
 
 bool connected = false;
 
-AHTxx sht30(SHT30_ADDR, AHT2x_SENSOR);  // Ініціалізація для SHT30
+SHT3X sht30;  // Створюємо об'єкт сенсора
 WiFiClient client;
 
 HADevice device(HOSTNAME);
@@ -81,68 +81,69 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Booting...");
   Wire.begin(SDA_PIN, SCL_PIN);
-  Serial.println("Scanning I2C...");
 
-  // Скануємо I2C-пристрої
-  for(uint8_t address = 1; address < 127; address++) {
-    Wire.beginTransmission(address);
-    if(Wire.endTransmission() == 0) {
-      Serial.print("Found I2C device at 0x");
-      Serial.println(address, HEX);
-    }
+  // Serial.println("Scanning I2C...");
+
+  // // Скануємо I2C-пристрої
+  // for(uint8_t address = 1; address < 127; address++) {
+  //   Wire.beginTransmission(address);
+  //   if(Wire.endTransmission() == 0) {
+  //     Serial.print("Found I2C device at 0x");
+  //     Serial.println(address, HEX);
+  //   }
+  // }
+
+  // Перевіряємо, чи сенсор відповідає
+  if(sht30.get() != 0) {
+    Serial.println("SHT3x не відповідає! Перевір підключення.");
+  } else {
+    Serial.println("SHT3x знайдено!");
   }
 
-  if(!sht30.begin()) {
-    Serial.println("SHT30 not found! Check wiring.");
-    while(1);
-  }
-  Serial.println("SHT30 detected!");
-}
+  // Логування розміру флеш-пам'яті
+  uint32_t flashSize = ESP.getFlashChipRealSize();
+  Serial.print("Flash size: ");
+  Serial.print(flashSize);
+  Serial.println(" bytes");
 
-// Логування розміру флеш-пам'яті
-uint32_t flashSize = ESP.getFlashChipRealSize();
-Serial.print("Flash size: ");
-Serial.print(flashSize);
-Serial.println(" bytes");
+  // set device's details (optional)
+  device.setName(HOSTNAME);
+  device.setSoftwareVersion("1.0.0");
 
-// set device's details (optional)
-device.setName(HOSTNAME);
-device.setSoftwareVersion("1.0.0");
+  pinMode(SSR_PIN, OUTPUT);
+  digitalWrite(SSR_PIN, HIGH);
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, LOW);
 
-pinMode(SSR_PIN, OUTPUT);
-digitalWrite(SSR_PIN, HIGH);
-pinMode(LED, OUTPUT);
-digitalWrite(LED, LOW);
+  // set icon (optional)
+  fanSwitch.setIcon("mdi:fan");
+  fanSwitch.setName("Room Fan");
 
-// set icon (optional)
-fanSwitch.setIcon("mdi:fan");
-fanSwitch.setName("Room Fan");
+  // configure sensors
+  roomTemp.setIcon("mdi:thermometer");
+  roomTemp.setName("Room Temp");
+  roomTemp.setUnitOfMeasurement("°C");
 
-// configure sensors
-roomTemp.setIcon("mdi:thermometer");
-roomTemp.setName("Room Temp");
-roomTemp.setUnitOfMeasurement("°C");
+  roomHum.setIcon("mdi:water-percent");
+  roomHum.setName("Room Humidity");
+  roomHum.setUnitOfMeasurement("%");
 
-roomHum.setIcon("mdi:water-percent");
-roomHum.setName("Room Humidity");
-roomHum.setUnitOfMeasurement("%");
+  wifiRssi.setIcon("mdi:wifi");
+  wifiRssi.setName("WIFI RSSI");
+  wifiRssi.setUnitOfMeasurement("dBm");
 
-wifiRssi.setIcon("mdi:wifi");
-wifiRssi.setName("WIFI RSSI");
-wifiRssi.setUnitOfMeasurement("dBm");
+  // handle switch state
+  fanSwitch.onCommand(onSwitchCommand);
+  mqtt.onConnected(onMqttConnected);
+  mqtt.onDisconnected(onMqttDisconnected);
+  mqtt.onStateChanged(onMqttStateChanged);
 
-// handle switch state
-fanSwitch.onCommand(onSwitchCommand);
-mqtt.onConnected(onMqttConnected);
-mqtt.onDisconnected(onMqttDisconnected);
-mqtt.onStateChanged(onMqttStateChanged);
+  mqtt.begin(BROKER_ADDR, MQTT_USERNAME, MQTT_PASSWORD);
+  device.enableSharedAvailability();
+  device.enableLastWill();
 
-mqtt.begin(BROKER_ADDR, MQTT_USERNAME, MQTT_PASSWORD);
-device.enableSharedAvailability();
-device.enableLastWill();
-
-// Ініціалізація OTA з паролем
-setupOTA(HOSTNAME, OTA_PASSWORD);
+  // Ініціалізація OTA з паролем
+  setupOTA(HOSTNAME, OTA_PASSWORD);
 }
 
 unsigned long lastUpdateAt = 0;             // Змінна для зберігання часу останнього оновлення
@@ -189,14 +190,14 @@ void loop() {
     int8_t rssi = WiFi.RSSI();
     wifiRssi.setValue(rssi);
 
-    sht30.heater(false);
-    temperature = sht30.readTemperature();
-    humidity = sht30.readHumidity();
-    Serial.print("Temperature:");
-    Serial.println(temperature);
-    Serial.print("Humidity:");
-    Serial.println(humidity);
-    roomTemp.setValue(temperature);
-    roomHum.setValue(humidity);
+    // sht30.get();
+    // temperature = sht30.cTemp;
+    // humidity = sht30.humidity;
+    // Serial.print("Temperature:");
+    // Serial.println(temperature);
+    // Serial.print("Humidity:");
+    // Serial.println(humidity);
+    // roomTemp.setValue(temperature);
+    // roomHum.setValue(humidity);
   }
 }
