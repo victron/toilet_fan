@@ -10,7 +10,7 @@
 #define HOSTNAME "Room_fan"
 #define SSR_PIN 0
 #define BUTTON_PIN 3  // only RX possible as input
-#define LED 2
+#define LED D4
 bool connected = false;
 
 Adafruit_SHT31 sht30 = Adafruit_SHT31();
@@ -76,7 +76,7 @@ void onMqttStateChanged(HAMqtt::ConnectionState state) {
 void setup() {
   Serial.begin(115200);
   Serial.println("Booting...");
-  Wire.begin();  // Ініціалізація I2C (SDA=D2, SCL=D1)
+  Wire.begin(D2, D1);  // Примусово встановлюємо SDA/SCL
 
   setupWiFi();
 
