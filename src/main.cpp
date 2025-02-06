@@ -1,4 +1,4 @@
-#include <Adafruit_AHTX0.h>
+#include <Adafruit_SHT31.h>
 #include <Arduino.h>
 #include <ArduinoHA.h>
 #include <ESP8266WiFi.h>
@@ -13,15 +13,19 @@
 #define LED 2
 bool connected = false;
 
+Adafruit_SHT31 sht30 = Adafruit_SHT31();
 WiFiClient client;
+
 HADevice device(HOSTNAME);
 HAMqtt mqtt(client, device);
 // Unique ID
 HASwitch fanSwitch("fan_switch_Room");
 HASensorNumber wifiRssi("wifiRssi_Room", HASensorNumber::PrecisionP0);
+HASensorNumber roomTemp("Room_temp", HASensorNumber::PrecisionP2);
+HASensorNumber roomHum("Room_hum", HASensorNumber::PrecisionP2);
 
-Adafruit_AHTX0 aht;
-sensors_event_t humidity, temp;
+float temperature = 0.0;
+float humidity = 0.0;
 
 // Створюємо об'єкт кнопки
 // button btn(BUTTON_PIN);
@@ -72,6 +76,7 @@ void onMqttStateChanged(HAMqtt::ConnectionState state) {
 void setup() {
   Serial.begin(115200);
   Serial.println("Booting...");
+  Wire.begin();  // Ініціалізація I2C (SDA=D2, SCL=D1)
 
   setupWiFi();
 
@@ -95,15 +100,22 @@ void setup() {
   fanSwitch.setName("Room Fan");
 
   // configure sensors
+  roomTemp.setIcon("mdi:thermometer");
+  roomTemp.setName("Bath Temp");
+  roomTemp.setUnitOfMeasurement("°C");
+
+  roomHum.setIcon("mdi:water-percent");
+  roomHum.setName("Bath Humidity");
+  roomHum.setUnitOfMeasurement("%");
+
   wifiRssi.setIcon("mdi:wifi");
   wifiRssi.setName("WIFI RSSI");
   wifiRssi.setUnitOfMeasurement("dBm");
 
-  if(!aht.begin()) {
-    Serial.println("AHT20 не знайдено! Перевір I2C підключення.");
-    // while(1);
+  if(!sht30.begin(0x44)) {  // SHT30 має адресу 0x44 або 0x45
+    Serial.println("SHT30 не знайдено! Перевір I2C підключення.");
   } else {
-    Serial.println("AHT20 знайдено!");
+    Serial.println("SHT30 знайдено!");
   }
 
   // handle switch state
@@ -164,6 +176,9 @@ void loop() {
     int8_t rssi = WiFi.RSSI();
     wifiRssi.setValue(rssi);
 
-    aht.getEvent(&humidity, &temp);
+    temperature = sht30.readTemperature();
+    humidity = sht30.readHumidity();
+    roomTemp.setValue(temperature);
+    roomHum.setValue(humidity);
   }
 }
