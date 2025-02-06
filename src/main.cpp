@@ -188,6 +188,10 @@ void loop() {
 
     temperature = sht30.readTemperature();
     humidity = sht30.readHumidity();
+    Serial.print("Temperature:");
+    Serial.println(temperature);
+    Serial.print("Humidity:");
+    Serial.println(humidity);
     roomTemp.setValue(temperature);
     roomHum.setValue(humidity);
   }
