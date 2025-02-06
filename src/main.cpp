@@ -37,15 +37,6 @@ void setupWiFi() {
   Serial.print("connecting to ");
   Serial.println(WIFI_SSID);
 
-  Serial.println("Сканую I2C пристрої...");
-  for(uint8_t address = 1; address < 127; address++) {
-    Wire.beginTransmission(address);
-    if(Wire.endTransmission() == 0) {
-      Serial.print("Знайдено пристрій на 0x");
-      Serial.println(address, HEX);
-    }
-  }
-
   WiFi.hostname(HOSTNAME);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while(WiFi.status() != WL_CONNECTED) {
@@ -89,6 +80,16 @@ void setup() {
 
   setupWiFi();
 
+  // I2C scaner
+  // Serial.println("Сканую I2C пристрої...");
+  // for(uint8_t address = 1; address < 127; address++) {
+  //   Wire.beginTransmission(address);
+  //   if(Wire.endTransmission() == 0) {
+  //     Serial.print("Знайдено пристрій на 0x");
+  //     Serial.println(address, HEX);
+  //   }
+  // }
+
   // Логування розміру флеш-пам'яті
   uint32_t flashSize = ESP.getFlashChipRealSize();
   Serial.print("Flash size: ");
@@ -121,7 +122,7 @@ void setup() {
   wifiRssi.setName("WIFI RSSI");
   wifiRssi.setUnitOfMeasurement("dBm");
 
-  if(!sht30.begin(0x44)) {  // SHT30 має адресу 0x44 або 0x45
+  if(!sht30.begin(0x45)) {  // SHT30 має адресу 0x44 або 0x45
     Serial.println("SHT30 не знайдено! Перевір I2C підключення.");
   } else {
     Serial.println("SHT30 знайдено!");
