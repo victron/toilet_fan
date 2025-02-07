@@ -1,23 +1,23 @@
+#include <Adafruit_AHTX0.h>
 #include <Arduino.h>
 #include <ArduinoHA.h>
 #include <ESP8266WiFi.h>
-#include <WEMOS_SHT3x.h>
 #include <Wire.h>
 
 #include "OTAHandler.h"
 #include "secrets.h"
 
 #define HOSTNAME "Room_fan"
-#define SSR_PIN 0
-// #define BUTTON_PIN 3  // only RX possible as input
+#define SSR_PIN D5
+#define BUTTON_PIN 3  // only RX possible as input
 #define LED D4
 #define SDA_PIN D2
 #define SCL_PIN D1
-#define SHT30_ADDR AHTXX_ADDRESS_X45
-
 bool connected = false;
 
-SHT3X sht30;  // Створюємо об'єкт сенсора
+Adafruit_AHTX0 aht;
+sensors_event_t humidity, temp;
+
 WiFiClient client;
 
 HADevice device(HOSTNAME);
@@ -27,9 +27,6 @@ HASwitch fanSwitch("fan_switch_Room");
 HASensorNumber wifiRssi("wifiRssi_Room", HASensorNumber::PrecisionP0);
 HASensorNumber roomTemp("Room_temp", HASensorNumber::PrecisionP2);
 HASensorNumber roomHum("Room_hum", HASensorNumber::PrecisionP2);
-
-float temperature = 0.0;
-float humidity = 0.0;
 
 // Створюємо об'єкт кнопки
 // button btn(BUTTON_PIN);
@@ -93,12 +90,12 @@ void setup() {
   //   }
   // }
 
-  // Перевіряємо, чи сенсор відповідає
-  if(sht30.get() != 0) {
-    Serial.println("SHT3x не відповідає! Перевір підключення.");
-  } else {
-    Serial.println("SHT3x знайдено!");
+  Serial.println("Ініціалізація AHT20...");
+  if(!aht.begin()) {
+    Serial.println("Не вдалося знайти AHT20! Перевір з'єднання.");
+    while(1) delay(10);
   }
+  Serial.println("AHT20 знайдено!");
 
   // Логування розміру флеш-пам'яті
   uint32_t flashSize = ESP.getFlashChipRealSize();
@@ -190,14 +187,14 @@ void loop() {
     int8_t rssi = WiFi.RSSI();
     wifiRssi.setValue(rssi);
 
-    // sht30.get();
-    // temperature = sht30.cTemp;
-    // humidity = sht30.humidity;
-    // Serial.print("Temperature:");
-    // Serial.println(temperature);
-    // Serial.print("Humidity:");
-    // Serial.println(humidity);
-    // roomTemp.setValue(temperature);
-    // roomHum.setValue(humidity);
+    aht.getEvent(&humidity, &temp);  // Зчитування даних
+    Serial.print("temperature: ");
+    Serial.print(temp.temperature);
+    Serial.println("°C");
+    Serial.print("humidity: ");
+    Serial.print(humidity.relative_humidity);
+    Serial.println("%");
+    roomTemp.setValue(temp.temperature);
+    roomHum.setValue(humidity.relative_humidity);
   }
 }
