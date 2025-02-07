@@ -79,13 +79,14 @@ void setup() {
   Serial.println("Booting...");
   Wire.begin(SDA_PIN, SCL_PIN);
 
-  // Serial.println("Scanning I2C...");
+  setupWiFi();
 
-  // // Скануємо I2C-пристрої
+  // I2C scaner
+  // Serial.println("Сканую I2C пристрої...");
   // for(uint8_t address = 1; address < 127; address++) {
   //   Wire.beginTransmission(address);
   //   if(Wire.endTransmission() == 0) {
-  //     Serial.print("Found I2C device at 0x");
+  //     Serial.print("Знайдено пристрій на 0x");
   //     Serial.println(address, HEX);
   //   }
   // }
