@@ -1,4 +1,4 @@
-#include <Adafruit_SHT31.h>
+#include <Adafruit_AHTX0.h>
 #include <Arduino.h>
 #include <ArduinoHA.h>
 #include <ESP8266WiFi.h>
@@ -8,12 +8,16 @@
 #include "secrets.h"
 
 #define HOSTNAME "Room_fan"
-#define SSR_PIN 0
+#define SSR_PIN D5
 #define BUTTON_PIN 3  // only RX possible as input
-#define LED 2
+#define LED D4
+#define SDA_PIN D2
+#define SCL_PIN D1
 bool connected = false;
 
-Adafruit_SHT31 sht30 = Adafruit_SHT31();
+Adafruit_AHTX0 aht;
+sensors_event_t humidity, temp;
+
 WiFiClient client;
 
 HADevice device(HOSTNAME);
@@ -23,9 +27,6 @@ HASwitch fanSwitch("fan_switch_Room");
 HASensorNumber wifiRssi("wifiRssi_Room", HASensorNumber::PrecisionP0);
 HASensorNumber roomTemp("Room_temp", HASensorNumber::PrecisionP2);
 HASensorNumber roomHum("Room_hum", HASensorNumber::PrecisionP2);
-
-float temperature = 0.0;
-float humidity = 0.0;
 
 // Створюємо об'єкт кнопки
 // button btn(BUTTON_PIN);
@@ -76,7 +77,7 @@ void onMqttStateChanged(HAMqtt::ConnectionState state) {
 void setup() {
   Serial.begin(115200);
   Serial.println("Booting...");
-  Wire.begin();  // Ініціалізація I2C (SDA=D2, SCL=D1)
+  Wire.begin(SDA_PIN, SCL_PIN);
 
   setupWiFi();
 
@@ -89,6 +90,13 @@ void setup() {
   //     Serial.println(address, HEX);
   //   }
   // }
+
+  Serial.println("Ініціалізація AHT20...");
+  if(!aht.begin()) {
+    Serial.println("Не вдалося знайти AHT20! Перевір з'єднання.");
+    while(1) delay(10);
+  }
+  Serial.println("AHT20 знайдено!");
 
   // Логування розміру флеш-пам'яті
   uint32_t flashSize = ESP.getFlashChipRealSize();
@@ -121,12 +129,6 @@ void setup() {
   wifiRssi.setIcon("mdi:wifi");
   wifiRssi.setName("WIFI RSSI");
   wifiRssi.setUnitOfMeasurement("dBm");
-
-  if(!sht30.begin(0x45)) {  // SHT30 має адресу 0x44 або 0x45
-    Serial.println("SHT30 не знайдено! Перевір I2C підключення.");
-  } else {
-    Serial.println("SHT30 знайдено!");
-  }
 
   // handle switch state
   fanSwitch.onCommand(onSwitchCommand);
@@ -186,9 +188,14 @@ void loop() {
     int8_t rssi = WiFi.RSSI();
     wifiRssi.setValue(rssi);
 
-    temperature = sht30.readTemperature();
-    humidity = sht30.readHumidity();
-    roomTemp.setValue(temperature);
-    roomHum.setValue(humidity);
+    aht.getEvent(&humidity, &temp);  // Зчитування даних
+    Serial.print("temperature: ");
+    Serial.print(temp.temperature);
+    Serial.println("°C");
+    Serial.print("humidity: ");
+    Serial.print(humidity.relative_humidity);
+    Serial.println("%");
+    roomTemp.setValue(temp.temperature);
+    roomHum.setValue(humidity.relative_humidity);
   }
 }
