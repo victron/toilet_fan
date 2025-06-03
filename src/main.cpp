@@ -121,14 +121,17 @@ void setup() {
   roomTemp.setIcon("mdi:thermometer");
   roomTemp.setName("Room Temp");
   roomTemp.setUnitOfMeasurement("°C");
+  roomTemp.setDeviceClass("temperature");
 
   roomHum.setIcon("mdi:water-percent");
   roomHum.setName("Room Humidity");
   roomHum.setUnitOfMeasurement("%");
+  roomHum.setDeviceClass("humidity");
 
   wifiRssi.setIcon("mdi:wifi");
   wifiRssi.setName("WIFI RSSI");
   wifiRssi.setUnitOfMeasurement("dBm");
+  wifiRssi.setDeviceClass("signal_strength");
 
   // handle switch state
   fanSwitch.onCommand(onSwitchCommand);
