@@ -7,7 +7,6 @@
 #include "button.h"
 #include "secrets.h"
 
-#define HOSTNAME "toilet_fan"
 #define SSR_PIN 0
 #define BUTTON_PIN 3  // only RX possible as input
 #define LED 2
