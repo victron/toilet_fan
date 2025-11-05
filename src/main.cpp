@@ -23,27 +23,26 @@ HASensorNumber wifiRssi("wifiRssi_toilet", HASensorNumber::PrecisionP0);
 // Створюємо об'єкт кнопки
 // button btn(BUTTON_PIN);
 
-void setupWiFi() {
-  // template function
-  delay(10);
-  Serial.println();
-  Serial.print("connecting to ");
-  Serial.println(WIFI_SSID);
-
-  WiFi.hostname(HOSTNAME);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  while(WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+bool setupWiFi(unsigned long retry_interval = 30000) {
+  static unsigned long lastWiFiAttempt = 0;
+  if(WiFi.status() == WL_CONNECTED) {
+    return true;
   }
+  if(millis() - lastWiFiAttempt >= retry_interval) {
+    lastWiFiAttempt = millis();
+    Serial.print("connecting to ");
+    Serial.println(WIFI_SSID);
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+    WiFi.hostname(HOSTNAME);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  }
+  if(WiFi.status() != WL_CONNECTED) {
+    digitalWrite(LED, (millis() / 200) % 2);
+    return false;
+  }
 }
 
-void onSwitchCommand(bool state, HASwitch *sender) {
+void onSwitchCommand(bool state, HASwitch* sender) {
   // SSR only, instead MSR
   // digitalWrite(SSR_PIN, (state ? HIGH : LOW));
   digitalWrite(SSR_PIN, (state ? LOW : HIGH));  // інвертна логіка
@@ -115,28 +114,6 @@ const unsigned long updateInterval = 3000;  // Інтервал оновленн
 unsigned int wifi_fail_counter = 0;
 const unsigned int wifi_fail_triger = 300000;  // при кількості спроб реконнест
 void loop() {
-  // Перевірка WiFi з'єднання
-  if(!connected && WiFi.status() == WL_CONNECTED) {
-    // not mqtt and connected to wifi
-    Serial.println("WiFi OK, mqtt NOK");
-    digitalWrite(LED, (millis() / 1000) % 2);
-  }
-  // Перевірка WiFi з'єднання
-  if(WiFi.status() != WL_CONNECTED && wifi_fail_counter > wifi_fail_triger) {
-    Serial.println("WiFi lost, trying to reconnect...");
-    setupWiFi();
-  }
-  if(WiFi.status() != WL_CONNECTED) {
-    digitalWrite(LED, LOW);
-    wifi_fail_counter++;
-    Serial.print("WiFi lost, counter=");
-    Serial.println(wifi_fail_counter);
-    return;
-  }
-
-  mqtt.loop();
-  ArduinoOTA.handle();
-
   // Перевірка натискання кнопки
   // if(btn.click()) {
   //   // Зміна стану перемикача
@@ -146,11 +123,22 @@ void loop() {
   //   // onSwitchCommand(!fanSwitch.getCurrentState(), &fanSwitch);
   // }
 
+  // ------------ remote -----------------------
+  if(!connected && WiFi.status() == WL_CONNECTED) {
+    // not mqtt and connected to wifi
+    Serial.println("WiFi OK, mqtt NOK");
+    digitalWrite(LED, (millis() / 1000) % 2);
+  }
+
+  if(!setupWiFi()) return;
+
+  mqtt.loop();
+  ArduinoOTA.handle();
+
   // Перевіряємо, чи минув інтервал оновлення
-  if(millis() - lastUpdateAt > updateInterval) {
+  if(millis() - lastUpdateAt > 5000) {
     lastUpdateAt = millis();
     // Моніторинг рівня WiFi сигналу
-    int8_t rssi = WiFi.RSSI();
-    wifiRssi.setValue(rssi);
+    wifiRssi.setValue(WiFi.RSSI());
   }
 }
