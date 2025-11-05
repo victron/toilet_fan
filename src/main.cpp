@@ -38,8 +38,8 @@ bool setupWiFi(unsigned long retry_interval = 30000) {
   }
   if(WiFi.status() != WL_CONNECTED) {
     digitalWrite(LED, (millis() / 200) % 2);
-    return false;
   }
+  return false;
 }
 
 void onSwitchCommand(bool state, HASwitch* sender) {
