@@ -121,7 +121,7 @@
                 "ARDUINO=10805",
                 "ARDUINO_BOARD=\"PLATFORMIO_ESP12E\"",
                 "ARDUINO_BOARD_ID=\"esp12e\"",
-                "FLASHMODE_DIO",
+                "FLASHMODE_DOUT",
                 "LWIP_OPEN_SRC",
                 "NONOSDK22x_190703=1",
                 "TCP_MSS=536",
