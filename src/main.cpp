@@ -24,30 +24,40 @@ HASensorNumber wifiRssi("wifiRssi_toilet", HASensorNumber::PrecisionP0);
 
 bool setupWiFi(unsigned long retry_interval = 30000) {
   static unsigned long lastWiFiAttempt = 0;
-  // якщо вже підключені — ок
-  if (WiFi.status() == WL_CONNECTED) {
-    return true;
+
+  // Перевіряємо чи є валідна IP адреса
+  IPAddress ip = WiFi.localIP();
+  if(WiFi.status() == WL_CONNECTED && ip[0] != 0) {
+    return true;  // Все ОК - є з'єднання і IP
   }
 
-  // перша спроба має відбутися одразу (lastWiFiAttempt == 0) або по таймауту
-  if (lastWiFiAttempt == 0 || millis() - lastWiFiAttempt >= retry_interval) {
+  // Якщо підключені але немає IP (0.0.0.0) - DHCP проблема
+  if(WiFi.status() == WL_CONNECTED && ip[0] == 0) {
+    Serial.println("WiFi connected but no IP (0.0.0.0) - reconnecting...");
+    WiFi.disconnect(true);  // Повний disconnect
+    delay(1000);
+  }
+
+  // Спроба підключення по таймауту
+  if(lastWiFiAttempt == 0 || millis() - lastWiFiAttempt >= retry_interval) {
     lastWiFiAttempt = millis();
     Serial.print("connecting to ");
     Serial.println(WIFI_SSID);
 
-    WiFi.mode(WIFI_STA);                 // гарантуємо режим станції
-    WiFi.setAutoReconnect(true);         // авто перепідключення
+    WiFi.mode(WIFI_STA);
+    WiFi.setAutoReconnect(true);
     WiFi.hostname(HOSTNAME);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   }
 
-  if (WiFi.status() != WL_CONNECTED) {
+  if(WiFi.status() != WL_CONNECTED) {
     digitalWrite(LED, ((millis() / 200) % 2) ? HIGH : LOW);
-  } else {
+  } else if(ip[0] != 0) {
     Serial.print("WiFi connected, IP: ");
     Serial.println(WiFi.localIP());
   }
-  return (WiFi.status() == WL_CONNECTED);
+
+  return (WiFi.status() == WL_CONNECTED && ip[0] != 0);
 }
 
 void onSwitchCommand(bool state, HASwitch* sender) {
