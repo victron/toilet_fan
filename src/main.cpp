@@ -24,21 +24,30 @@ HASensorNumber wifiRssi("wifiRssi_toilet", HASensorNumber::PrecisionP0);
 
 bool setupWiFi(unsigned long retry_interval = 30000) {
   static unsigned long lastWiFiAttempt = 0;
-  if(WiFi.status() == WL_CONNECTED) {
+  // якщо вже підключені — ок
+  if (WiFi.status() == WL_CONNECTED) {
     return true;
   }
-  if(millis() - lastWiFiAttempt >= retry_interval) {
+
+  // перша спроба має відбутися одразу (lastWiFiAttempt == 0) або по таймауту
+  if (lastWiFiAttempt == 0 || millis() - lastWiFiAttempt >= retry_interval) {
     lastWiFiAttempt = millis();
     Serial.print("connecting to ");
     Serial.println(WIFI_SSID);
 
+    WiFi.mode(WIFI_STA);                 // гарантуємо режим станції
+    WiFi.setAutoReconnect(true);         // авто перепідключення
     WiFi.hostname(HOSTNAME);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   }
-  if(WiFi.status() != WL_CONNECTED) {
-    digitalWrite(LED, (millis() / 200) % 2);
+
+  if (WiFi.status() != WL_CONNECTED) {
+    digitalWrite(LED, ((millis() / 200) % 2) ? HIGH : LOW);
+  } else {
+    Serial.print("WiFi connected, IP: ");
+    Serial.println(WiFi.localIP());
   }
-  return false;
+  return (WiFi.status() == WL_CONNECTED);
 }
 
 void onSwitchCommand(bool state, HASwitch* sender) {
@@ -68,13 +77,16 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Booting...");
 
+  // одразу встановити режим і спробувати під'єднатися
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
   setupWiFi();
 
   // Логування розміру флеш-пам'яті
-  uint32_t flashSize = ESP.getFlashChipRealSize();
-  Serial.print("Flash size: ");
-  Serial.print(flashSize);
-  Serial.println(" bytes");
+  // uint32_t flashSize = ESP.getFlashChipRealSize();
+  // Serial.print("Flash size: ");
+  // Serial.print(flashSize);
+  // Serial.println(" bytes");
 
   // set device's details (optional)
   device.setName(HOSTNAME);
